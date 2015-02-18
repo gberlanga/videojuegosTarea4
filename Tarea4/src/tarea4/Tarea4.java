@@ -3,6 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
+/**
+ *
+ * @author Gabriel Berlanga y Rafael Hinojosa
+ * 
+ */
 package tarea4;
 
 import java.applet.Applet;
@@ -29,10 +35,9 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-/**
- *
- * @author gberlanga
- */
+
+
+
 public class Tarea4 extends JFrame implements Runnable, KeyListener {
         public class Puntaje {
        
@@ -69,7 +74,7 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
         }
 }
         
-         private final int iMAXANCHO = 10; // maximo numero de personajes por ancho
+    private final int iMAXANCHO = 10; // maximo numero de personajes por ancho
     private final int iMAXALTO = 8;  // maxuimo numero de personajes por alto
     private Base basPrincipal;         // Objeto principal      
     private Base basGameOver;           //imagen de gameover
