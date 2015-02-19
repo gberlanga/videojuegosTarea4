@@ -39,40 +39,7 @@ import javax.swing.JOptionPane;
 
 
 public class Tarea4 extends JFrame implements Runnable, KeyListener {
-        public class Puntaje {
-       
-        private String nombre;
-        private int puntaje;
-       
-        public Puntaje() {                            
-                nombre = "";
-                puntaje = 0;
-        }
-       
-        public Puntaje(String nombre, int puntaje) {                      
-                this.nombre = nombre;
-                this.puntaje = puntaje;
-        }
-       
-        public void setNombre(String nombre) {                              
-                this.nombre = nombre;
-        }                  
-        public void setPuntaje(int puntaje) {                
-                this.puntaje = puntaje;
-        }
- 
-        public String getNombre() {          
-                return nombre;
-        }              
-       
-        public int getPuntaje() {          
-                return puntaje;
-        }
-       
-        public String toString(){                  
-                return "" + getPuntaje() + "," + getNombre();
-        }
-}
+
         
     private final int iMAXANCHO = 10; // maximo numero de personajes por ancho
     private final int iMAXALTO = 8;  // maxuimo numero de personajes por alto
@@ -87,12 +54,15 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
     private boolean bAbaj;
     private boolean bPause;         //boolean que prende si esta en pausa
     private boolean bGameOver;   // booleana que prende cuando termina el juego
+    private int iDatos[] = new int[4];  //arreglo de datos que se leen al cargar
     private int iVidas;           // EL numero de vidas
     private int iPuntos;            // el numero de puntos
     private int iAzar;           // se usa para almacenar numeros aleatorios
     private int iPosX;          // se almacena alguna posicion en x
     private int iPosY;          // se almacena alguna posicion en Y
     private int iSpeed;         // velocidad de chimpy y diddy
+    private int iChimpys;       // cuenta el numero de chimpys creados
+    private int iDiddys;       // cuenta el numero de diddys creados
     
     /* objetos para manejar el buffer del Applet y este no parpadee */
     private Image    imaImagenApplet;   // Imagen a proyectar en Applet	
@@ -105,12 +75,33 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
     private String[] arr;    //Arreglo del archivo divido.
     private long tiempoActual;  //Tiempo de control de la animación
     
+    //defino la imagen de juanito
+    URL urlImagenPrincipal = this.getClass().getResource("juanito.gif");
+
+    // defino la imagen de chimpy
+    URL urlImagenChimpy = this.getClass().getResource("chimpy.gif");
+    
+    //defino la imagen de diddy
+    URL urlImagenDiddy = this.getClass().getResource("diddy.gif");
+    
+    // la imagen para game Over
+    URL urlImagenGameOver = this.getClass().getResource("gameover.gif");
+    
     public Tarea4(){
         init();
         start();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
     
+    /** 
+     * start
+     * 
+     * Metodo sobrescrito de la clase <code>Applet</code>.<P>
+     * En este metodo se crea e inicializa el hilo
+     * para la animacion este metodo es llamado despues del init 
+     * <code>Applet</code>
+     * 
+     */
     public void start () {
         //Declaras un hilo
         Thread th = new Thread (this);
@@ -118,6 +109,14 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
         th.start();
     }
     
+    /** 
+     * init
+     * 
+     * Metodo sobrescrito de la clase <code>Applet</code>.<P>
+     * En este metodo se inizializan las variables o se crean los objetos
+     * a usarse en el <code>Applet</code> y se definen funcionalidades.
+     * 
+     */
     public void init(){
         nombreArchivo = "Puntaje.txt";
         vec = new Vector();
@@ -141,7 +140,6 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
         lklChimpy = new LinkedList();
         lklDiddy = new LinkedList();
              
-	URL urlImagenPrincipal = this.getClass().getResource("juanito.gif");
                 
         // se crea el objeto para principal 
 	basPrincipal = new Base(0, 0, getWidth() / iMAXANCHO,
@@ -152,11 +150,11 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
         basPrincipal.setX(getWidth()/2);
         basPrincipal.setY(getHeight()/2);
         
-        // defino la imagen de chimpy
-	URL urlImagenChimpy = this.getClass().getResource("chimpy.gif");
+        
         
         //se crea el grupo de #Azar chimpys
         iAzar = (int) (Math.random() * 4 + 5);
+        iChimpys = iAzar;
         for (int iI = 0; iI < iAzar; iI++) {
             // se crea el objeto para chimpy
             Base basChimpy = new Base(iPosX,iPosY, getWidth() / iMAXANCHO,
@@ -168,11 +166,11 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
             lklChimpy.add(basChimpy);
         }
         
-        // defino la imagen de diddy
-	URL urlImagenDiddy = this.getClass().getResource("diddy.gif");
+        
         
         //se crea el grupo de #Azar diddys
         iAzar = (int) (Math.random() * 4 + 5);
+        iDiddys = iAzar;
         for (int iI = 0; iI < iAzar; iI++) {
             // se crea el objeto para diddy
             Base basDiddy = new Base(iPosX,iPosY, getWidth() / iMAXANCHO,
@@ -184,8 +182,7 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
             lklDiddy.add(basDiddy);
 
         }
-        // la imagen para game Over
-        URL urlImagenGameOver = this.getClass().getResource("gameover.gif");
+        
         
         // se crea el objeto para gameOver
         basGameOver = new Base(iPosX,iPosY, getWidth(), getHeight(),
@@ -206,6 +203,17 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
         addKeyListener(this);
     }
     
+    /**
+     * paint
+     * 
+     * Metodo sobrescrito de la clase <code>Applet</code>,
+     * heredado de la clase Container.<P>
+     * En este metodo lo que hace es actualizar el contenedor y 
+     * define cuando usar ahora el paint1
+     * 
+     * @param graGrafico es el <code>objeto grafico</code> usado para dibujar.
+     * 
+     */
     public void paint (Graphics graGrafico) {
         // Inicializan el DoubleBuffer
         if (imaImagenApplet == null){
@@ -227,6 +235,17 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
         graGrafico.drawImage (imaImagenApplet, 0, 0, this);
     }
     
+    /**
+     * paint1
+     * 
+     * Metodo sobrescrito de la clase <code>Applet</code>,
+     * heredado de la clase Container.<P>
+     * En este metodo se dibuja la imagen con la posicion actualizada,
+     * ademas que cuando la imagen es cargada te despliega una advertencia.
+     * 
+     * @param graDibujo es el objeto de <code>Graphics</code> usado para dibujar.
+     * 
+     */
     public void paint1(Graphics graDibujo){
          // si la imagen ya se cargo
         if (basPrincipal != null && lklChimpy != null && lklDiddy != null) {
@@ -257,6 +276,12 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
         }
     }
     
+    /** 
+     * actualiza
+     * 
+     * Metodo que actualiza la posicion de los objetos 
+     * 
+     */
      public void actualiza(){
         if (bArri) {
             basPrincipal.setY(basPrincipal.getY() - (getHeight()/iMAXALTO));
@@ -352,6 +377,14 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
         basParam.setY( (((int) (Math.random() * iMAXALTO)) * getHeight( )) /8 );
     }
     
+    /** 
+     * run
+     * 
+     * Metodo sobrescrito de la clase <code>Thread</code>.<P>
+     * En este metodo se ejecuta el hilo, que contendrá las instrucciones
+     * de nuestro juego.
+     * 
+     */
     public void run () {
         /* mientras dure el juego, se actualizan posiciones de jugadores
            se checa si hubo colisiones para desaparecer jugadores o corregir
@@ -373,57 +406,125 @@ public class Tarea4 extends JFrame implements Runnable, KeyListener {
             }
         }
         repaint();
-                // pide el nombre de usuario
-                String nombre = JOptionPane.showInputDialog("Cual es tu nombre?");
-                JOptionPane.showMessageDialog(null,
-                              "El puntaje de " + nombre + " es: " + iPuntos, "PUNTAJE",
-                              JOptionPane.PLAIN_MESSAGE);
-                try {
- 
-                      leeArchivo();    //lee el contenido del archivo
-                      //Agrega el contenido del nuevo puntaje al vector.
-                      vec.add(new Puntaje(nombre,iPuntos));
-                      //Graba el vector en el archivo.
-                      grabaArchivo();
-                } catch(IOException e) {
- 
-                      System.out.println("Error en " + e.toString());
-                }
     }
     
+    /**
+     * Metodo leeArchivo
+     * 
+     * Metodo que lee lo escrito en un archivo y reasigna las posiciones del juego
+     * @throws IOException 
+     */
     public void leeArchivo() throws IOException {
-                                                         
+                                       
+               String dato = "";
+               int iLeeChimpy;
+               int iLeeDiddy;
                 BufferedReader fileIn;
                 try {
                         fileIn = new BufferedReader(new FileReader(nombreArchivo));
-                } catch (FileNotFoundException e){
+                        lklChimpy.clear();
+                        lklDiddy.clear();
+
+                } 
+                catch (FileNotFoundException e){
                         File puntos = new File(nombreArchivo);
                         PrintWriter fileOut = new PrintWriter(puntos);
-                        fileOut.println("100,demo");
                         fileOut.close();
                         fileIn = new BufferedReader(new FileReader(nombreArchivo));
+
                 }
-                String dato = fileIn.readLine();
-                while(dato != null) {  
-                                                       
-                      arr = dato.split(",");
-                      int num = (Integer.parseInt(arr[0]));
-                      String nom = arr[1];
-                      vec.add(new Puntaje(nom,num));
-                      dato = fileIn.readLine();
+                
+
+                if(dato != null) {  
+                    // se lee el numero de chimpys
+                    dato = fileIn.readLine();
+                    iLeeChimpy = (Integer.parseInt(dato));
+                    // se vuelve a crear la lista de chimpys
+                    for (int iI = 0; iI < iLeeChimpy; iI++) {
+                        dato = fileIn.readLine();
+                        arr = dato.split(",");
+                        reasignarDatos();
+                        // se crea el objeto para chimpy
+                        Base basChimpy = new Base(iDatos[0],iDatos[1],
+                                                    iDatos[2], iDatos[3],
+                        Toolkit.getDefaultToolkit().getImage(urlImagenChimpy));
+
+
+                        lklChimpy.add(basChimpy);
+                    }
+                    // se lee el numero de diddys
+                    dato = fileIn.readLine();
+                    iLeeDiddy = (Integer.parseInt(dato));
+                    // se vuelve a crear la lista de diddys
+                    for (int iI = 0; iI < iLeeDiddy; iI++) {
+                        dato = fileIn.readLine();
+                        arr = dato.split(",");
+                        reasignarDatos();
+                        // se crea el objeto para chimpy
+                        Base basDiddy = new Base(iDatos[0],iDatos[1],
+                                                    iDatos[2], iDatos[3],
+                        Toolkit.getDefaultToolkit().getImage(urlImagenDiddy));
+
+
+                        lklDiddy.add(basDiddy);
+                    }
+                    dato = fileIn.readLine();
+                    arr = dato.split(",");
+                    reasignarDatos();
+                    basPrincipal.setX(iDatos[0]);
+                    basPrincipal.setY(iDatos[1]);
+                    
+                    dato = fileIn.readLine();
+                    iPuntos = Integer.parseInt(dato);
+                    
+                    dato = fileIn.readLine();
+                    iVidas = Integer.parseInt(dato);
+                    
+                    dato = fileIn.readLine();
+                    iSpeed = Integer.parseInt(dato);
+                    
+                    dato = fileIn.readLine();
+                    bPause = Boolean.parseBoolean(dato);
+                    
+                    
                 }
                 fileIn.close();
         }    
+    
+    /**
+     * Metodo reasignarDatos
+     * 
+     * Metodo que asigna los valores almacenados en el archivo a un arreglo
+     * de 4 ints
+     */
+    public void reasignarDatos(){
+        for (int iJ = 0 ; iJ < 4; iJ ++) {
+            iDatos[iJ] = (Integer.parseInt(arr[iJ]));
+        }
+    }
      
+    /**
+     * Metodo grabaArchivo
+     * 
+     * Metodo que almacena en un documento de texto el estado actual del juego
+     * @throws IOException 
+     */
     public void grabaArchivo() throws IOException {
                                                          
                 PrintWriter fileOut = new PrintWriter(new FileWriter(nombreArchivo));
-                for (int i = 0; i < vec.size(); i++) {
- 
-                    Puntaje x;
-                    x = (Puntaje) vec.get(i);
-                    fileOut.println(x.toString());
+                fileOut.println(iChimpys);
+                for (Base basChimpy : lklChimpy) {
+                    fileOut.println(basChimpy.toString());
                 }
+                fileOut.println(iDiddys);
+                for (Base basDiddy : lklDiddy) {
+                    fileOut.println(basDiddy.toString());
+                }
+                fileOut.println(basPrincipal.toString());
+                fileOut.println(iPuntos);
+                fileOut.println(iVidas);
+                fileOut.println(iSpeed);
+                fileOut.println(bPause);
                 fileOut.close();
         }
     

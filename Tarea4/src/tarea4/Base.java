@@ -6,7 +6,7 @@ package tarea4;
  * Modela la definición de todos los objetos de tipo
  * <code>Base</code>
  *
- * @author L. Rafael Hinojosa V.
+ * @author Gabriel Berlanga y L. Rafael Hinojosa V.
  * @version 1.9 
  * @date 11/feb/15
  */
@@ -216,7 +216,8 @@ public class Base {
      * 
      */
     public String toString() {
-        return " x: " + this.getX() + " y: "+ this.getY() +
-                " ancho: " + this.getAncho() + " alto: " + this.getAlto();
+        // regresa los valores de x, y, ancho alto separado por commas
+        return this.getX() + ","+ this.getY() + "," + this.getAncho() + 
+                "," + this.getAlto();
     }
 }
